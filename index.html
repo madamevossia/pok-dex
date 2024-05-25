@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>pokédesk</title>
+ <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="container">
+    <h1>Pokédex</h1>
+    <div>
+        <input type="text" id="pokemonName" placeholder="Enter Pokémon name" onkeypress="handleKeyPress(event)">
+        <button onclick="searchPokemon()">Search</button>
+    </div>
+    <div id="pokedex"></div>
+</div>
+
+<script>
+    async function getPokemonData(pokemonName) {
+      try {
+          const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+          if (!response.ok) {
+              throw new Error('Pokémon not found');
+          }
+          const data = await response.json();
+          return data;
+      } catch (error) {
+          return null;
+      }
+    }
+
+    async function searchPokemon() {
+        const pokemonNameInput = document.getElementById('pokemonName').value.toLowerCase();
+
+      if (!pokemonNameInput) {
+          showNotFoundMessage();
+          return;
+      }
+        const pokemonData = await getPokemonData(pokemonNameInput);
+        if (pokemonData) {
+            renderPokemon(pokemonData);
+        } else {
+        showNotFoundMessage();
+      }
+    }
+
+  function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+          searchPokemon();
+      }
+  }
+
+    function renderPokemon(pokemon) {
+        const pokedexElement = document.getElementById('pokedex');
+        const types = pokemon.types.map(type => type.type.name).join(', ');
+        const pokemonCard = `
+            <div class="pokemon-card">
+                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
+                <h2>${pokemon.name.charAt(0).toUpperCase()+pokemon.name.slice(1)}</h2>
+                <p>Type: ${types.charAt(0).toUpperCase()+types.slice(1)}</p>
+                <p>Height: ${pokemon.height}</p>
+                <p>Weight: ${pokemon.weight}</p>
+            </div>
+        `;
+        pokedexElement.innerHTML = pokemonCard;
+    }
+
+  function showNotFoundMessage() {
+      const pokedexElement = document.getElementById('pokedex');
+      const notFoundMessage = `
+          <div class="not-found">
+              <h1>Ops.. Pokémon not found!</h1>
+          </div>
+      `;
+      pokedexElement.innerHTML = notFoundMessage;
+  }
+
+</script>
+</body>
+</html>

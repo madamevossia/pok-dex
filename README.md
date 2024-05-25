@@ -1,2 +1,0 @@
-# pok-dex
-un pokèdex
